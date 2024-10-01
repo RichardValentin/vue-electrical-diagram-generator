@@ -282,19 +282,19 @@ export default {
     drawFrame(svg) {
       svg.appendChild(this.createSVGElement('rect', { x: 10, y: 10, width: 780, height: 580, fill: 'none', stroke: 'black', 'stroke-width': 1 }));
 
-      // Draw vertical lines
-      for (let i = 0; i <= 10; i++) {
-        const x = 10 + i * 78;
-        svg.appendChild(this.createSVGElement('line', { x1: x, y1: 10, x2: x, y2: 520, stroke: 'black', 'stroke-width': 0.5 }));
-        const text = this.createSVGElement('text', { x: x + 34, y: 5, 'text-anchor': 'middle', 'font-size': 12 });
+      svg.appendChild(this.createSVGElement('line', { x1: 10, y1: 40, x2: 790, y2: 40, stroke: 'black', 'stroke-width': 0.5 }));
+      for (let i = 0; i < 10; i++) {
+        svg.appendChild(this.createSVGElement('line', { x1: 10 + i * 78, y1: 10, x2: 10 + i * 78, y2: 40, stroke: 'black', 'stroke-width': 0.5 }));
+        const text = this.createSVGElement('text', { x: 49 + i * 78, y: 30, 'text-anchor': 'middle', 'font-size': 12 });
         text.textContent = i + 1;
         svg.appendChild(text);
       }
 
-      // Draw horizontal lines
-      for (let i = 0; i <= 5; i++) {
-        const y = 40 + i * 60;
-        svg.appendChild(this.createSVGElement('line', { x1: 10, y1: y, x2: 790, y2: y, stroke: 'black', 'stroke-width': 0.5 }));
+      for (let i = 0; i <= 10; i++) {
+        svg.appendChild(this.createSVGElement('line', { x1: 10 + i * 78, y1: 40, x2: 10 + i * 78, y2: 520, stroke: 'black', 'stroke-width': 0.5 }));
+      }
+      for (let i = 0; i < 8; i++) {
+        svg.appendChild(this.createSVGElement('line', { x1: 10, y1: 40 + i * 60, x2: 790, y2: 40 + i * 60, stroke: 'black', 'stroke-width': 0.5 }));
       }
 
       svg.appendChild(this.createSVGElement('rect', { x: 10, y: 520, width: 780, height: 70, fill: 'none', stroke: 'black', 'stroke-width': 1 }));
@@ -475,19 +475,19 @@ export default {
 
       // Draw horizontal lines
       for (let i = 0; i <= 5; i++) {
-        const y = 40 + i * 60;
+        const y = i * cellHeight;
         svg.appendChild(this.createSVGElement('line', {
           x1: 0, y1: y, x2: gridWidth, y2: y,
-          stroke: 'black', 'stroke-width': 0.5
+          stroke: 'black', 'stroke-width': 1
         }));
       }
 
       // Draw vertical lines
       for (let i = 0; i <= 10; i++) {
-        const x = 10 + i * 78;
+        const x = i * cellWidth;
         svg.appendChild(this.createSVGElement('line', {
-          x1: x, y1: 10, x2: x, y2: gridHeight,
-          stroke: 'black', 'stroke-width': 0.5
+          x1: x, y1: 0, x2: x, y2: gridHeight,
+          stroke: 'black', 'stroke-width': 1
         }));
       }
     },
@@ -576,6 +576,7 @@ export default {
 }
 .grid {
   display: table;
+  border-collapse: collapse;
 }
 .grid-row {
   display: table-row;
