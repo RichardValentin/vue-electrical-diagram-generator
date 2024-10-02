@@ -49,6 +49,22 @@
         :style="styles.input"
         required
       />
+      <input
+        type="text"
+        name="designer"
+        placeholder="Designer"
+        v-model="cartouche.designer"
+        :style="styles.input"
+        required
+      />
+      <input
+        type="text"
+        name="approval"
+        placeholder="Approval"
+        v-model="cartouche.approval"
+        :style="styles.input"
+        required
+      />
 
       <h2 :style="styles.subHeading">Composants Disponibles</h2>
       <div :style="styles.componentList">
@@ -64,14 +80,14 @@
       </div>
 
       <h2 :style="styles.subHeading">Grille de Composants</h2>
-      <div :style="styles.grid">
+      <div :style="styles.gridContainer">
         <div
-          v-for="row in 5"
+          v-for="row in gridHeight"
           :key="`row-${row}`"
           :style="styles.gridRow"
         >
           <div
-            v-for="col in 10"
+            v-for="col in gridWidth"
             :key="`cell-${row}-${col}`"
             :style="getCellStyle(row - 1, col - 1)"
             @drop="onDrop($event, row - 1, col - 1)"
@@ -99,6 +115,8 @@
         Générer le Schéma
       </button>
       <button :style="styles.button" @click="downloadPDF">Télécharger PDF</button>
+      <button :style="styles.button" @click="saveSchema">Sauvegarder le Schéma</button>
+      <button :style="styles.button" @click="loadSchema">Charger le Schéma</button>
     </form>
 
     <div :style="styles.svgContainer">
@@ -123,17 +141,19 @@ export default {
         reference: '',
         client: '',
         building: '',
-        folioNumber: ''
+        folioNumber: '',
+        designer: '',
+        approval: ''
       },
       isFormValid: false,
       errorMessage: '',
       availableComponents: [
-        { name: 'Disjoncteur', type: 'disjoncteur' },
-        { name: 'Prise', type: 'prise' },
-        { name: 'Interrupteur', type: 'interrupteur' },
-        { name: 'Lampe', type: 'lampe' }
+        { name: 'Disjoncteur', type: 'disjoncteur', characteristics: '4P 100A' },
+        { name: 'Prise', type: 'prise', characteristics: '1P 16A' },
+        { name: 'Interrupteur', type: 'interrupteur', characteristics: '1P 10A' },
+        { name: 'Lampe', type: 'lampe', characteristics: 'Lampe' }
       ],
-      grid: Array.from({ length: 5 }, () => Array(10).fill(null)),
+      grid: Array.from({ length: 6 }, () => Array(10).fill(null)),
       draggedComponent: null,
       styles: {
         container: {
@@ -171,6 +191,10 @@ export default {
           padding: '10px',
           border: '1px solid #ccc',
           cursor: 'move',
+        },
+        gridContainer: {
+          overflow: 'auto',
+          maxHeight: '450px',
         },
         grid: {
           display: 'table',
@@ -230,6 +254,14 @@ export default {
       }
     };
   },
+  computed: {
+    gridHeight() {
+      return 5;
+    },
+    gridWidth() {
+      return 10;
+    }
+  },
   methods: {
     dragStart(event, component) {
       this.draggedComponent = { ...component, id: Date.now() };
@@ -280,12 +312,12 @@ export default {
     },
 
     drawFrame(svg) {
-      svg.appendChild(this.createSVGElement('rect', { x: 10, y: 10, width: 780, height: 580, fill: 'none', stroke: 'black', 'stroke-width': 1 }));
+      svg.appendChild(this.createSVGElement('rect', { x: 10, y: 10, width: 780, height: 580, fill: '#ffffff', stroke: 'black', 'stroke-width': 1 }));
 
       svg.appendChild(this.createSVGElement('line', { x1: 10, y1: 40, x2: 790, y2: 40, stroke: 'black', 'stroke-width': 0.5 }));
       for (let i = 0; i < 10; i++) {
         svg.appendChild(this.createSVGElement('line', { x1: 10 + i * 78, y1: 10, x2: 10 + i * 78, y2: 40, stroke: 'black', 'stroke-width': 0.5 }));
-        const text = this.createSVGElement('text', { x: 49 + i * 78, y: 30, 'text-anchor': 'middle', 'font-size': 12 });
+        const text = this.createSVGElement('text', { x: 49 + i * 78, y: 30, 'text-anchor': 'middle', 'font-size': 12, fill: '#000000' });
         text.textContent = i + 1;
         svg.appendChild(text);
       }
@@ -293,21 +325,21 @@ export default {
       for (let i = 0; i <= 10; i++) {
         svg.appendChild(this.createSVGElement('line', { x1: 10 + i * 78, y1: 40, x2: 10 + i * 78, y2: 520, stroke: 'black', 'stroke-width': 0.5 }));
       }
-      for (let i = 0; i < 8; i++) {
+      for (let i = 0; i < 6; i++) {
         svg.appendChild(this.createSVGElement('line', { x1: 10, y1: 40 + i * 60, x2: 790, y2: 40 + i * 60, stroke: 'black', 'stroke-width': 0.5 }));
       }
 
-      svg.appendChild(this.createSVGElement('rect', { x: 10, y: 520, width: 780, height: 70, fill: 'none', stroke: 'black', 'stroke-width': 1 }));
+      svg.appendChild(this.createSVGElement('rect', { x: 10, y: 520, width: 780, height: 70, fill: '#ffffff', stroke: 'black', 'stroke-width': 1 }));
 
-      const sudelecText = this.createSVGElement('text', { x: 20, y: 540, 'font-size': 24, fill: 'red', 'font-weight': 'bold' });
+      const sudelecText = this.createSVGElement('text', { x: 20, y: 540, 'font-size': 24, fill: '#000000', 'font-weight': 'bold' });
       sudelecText.textContent = 'SUDELEC';
       svg.appendChild(sudelecText);
 
-      const addressText = this.createSVGElement('text', { x: 20, y: 555, 'font-size': 8 });
+      const addressText = this.createSVGElement('text', { x: 20, y: 555, 'font-size': 8, fill: '#000000' });
       addressText.textContent = 'B.P. 1773 - Pointe-Noire/R.CONGO';
       svg.appendChild(addressText);
 
-      const phoneText = this.createSVGElement('text', { x: 20, y: 565, 'font-size': 8 });
+      const phoneText = this.createSVGElement('text', { x: 20, y: 565, 'font-size': 8, fill: '#000000' });
       phoneText.textContent = 'Tél : +242 22 294 53 70 www.sudelec-congo.com';
       svg.appendChild(phoneText);
 
@@ -317,18 +349,18 @@ export default {
       svg.appendChild(this.createSVGElement('line', { x1: 10, y1: 550, x2: 790, y2: 550, stroke: 'black', 'stroke-width': 0.5 }));
 
       const cartoucheTexts = [
-        { x: 205, y: 535, content: 'VERIFIE:', size: 10 },
-        { x: 205, y: 565, content: 'APPROUVE:', size: 10 },
-        { x: 405, y: 535, content: this.cartouche.client, size: 12 },
-        { x: 405, y: 565, content: this.cartouche.building, size: 10 },
-        { x: 405, y: 580, content: 'Régal - Pointe-Noire', size: 10 },
-        { x: 605, y: 535, content: this.cartouche.projectName, size: 10 },
-        { x: 605, y: 565, content: this.cartouche.reference, size: 10 },
-        { x: 770, y: 580, content: this.cartouche.folioNumber, size: 14, anchor: 'end', weight: 'bold' },
-        { x: 205, y: 580, content: 'DATE DE CREATION:', size: 8 },
-        { x: 280, y: 580, content: this.cartouche.date, size: 8 },
-        { x: 320, y: 580, content: 'Création', size: 8 },
-        { x: 770, y: 535, content: 'FOLIO', size: 10, anchor: 'end' }
+        { x: 205, y: 535, content: 'VERIFIE:', size: 10, color: '#000000' },
+        { x: 205, y: 565, content: 'APPROUVE:', size: 10, color: '#000000' },
+        { x: 405, y: 535, content: this.cartouche.client, size: 12, color: '#000000' },
+        { x: 405, y: 565, content: this.cartouche.building, size: 10, color: '#000000' },
+        { x: 405, y: 580, content: 'Régal - Pointe-Noire', size: 10, color: '#000000' },
+        { x: 605, y: 535, content: this.cartouche.projectName, size: 10, color: '#000000' },
+        { x: 605, y: 565, content: this.cartouche.reference, size: 10, color: '#000000' },
+        { x: 770, y: 580, content: this.cartouche.folioNumber, size: 14, anchor: 'end', weight: 'bold', color: '#000000' },
+        { x: 205, y: 580, content: 'DATE DE CREATION:', size: 8, color: '#000000' },
+        { x: 280, y: 580, content: this.cartouche.date, size: 8, color: '#000000' },
+        { x: 320, y: 580, content: 'Création', size: 8, color: '#000000' },
+        { x: 770, y: 535, content: 'FOLIO', size: 10, anchor: 'end', color: '#000000' }
       ];
 
       cartoucheTexts.forEach(text => {
@@ -337,7 +369,8 @@ export default {
           y: text.y,
           'font-size': text.size,
           'text-anchor': text.anchor || 'start',
-          'font-weight': text.weight || 'normal'
+          'font-weight': text.weight || 'normal',
+          fill: text.color
         });
         textElement.textContent = text.content;
         svg.appendChild(textElement);
@@ -345,113 +378,206 @@ export default {
     },
 
     drawCircuitBreaker(svg, x, y, label) {
-      const group = this.createSVGElement('g', {});
+      const group = this.createSVGElement('g', { transform: `translate(${x},${y})` });
+
+      // Rectangle principal
       group.appendChild(this.createSVGElement('rect', {
-        x: x - 20, y: y - 20, width: 40, height: 40,
-        fill: 'none', stroke: 'black', 'stroke-width': 2
+        x: -15,
+        y: -15,
+        width: 30,
+        height: 30,
+        fill: 'none',
+        stroke: 'black',
+        'stroke-width': '1.5'
       }));
+
+      // Ligne diagonale
       group.appendChild(this.createSVGElement('line', {
-        x1: x - 10, y1: y, x2: x + 10, y2: y - 10,
-        stroke: 'black', 'stroke-width': 2
+        x1: -10,
+        y1: 10,
+        x2: 10,
+        y2: -10,
+        stroke: 'black',
+        'stroke-width': '1.5'
       }));
+
+      // Texte du label
       const text = this.createSVGElement('text', {
-        x: x, y: y + 40, 'text-anchor': 'middle',
-        'font-size': '10'
+        x: 0,
+        y: 25,
+        'text-anchor': 'middle',
+        'font-size': '8',
+        fill: 'black'
       });
       text.textContent = label;
       group.appendChild(text);
+
       svg.appendChild(group);
     },
 
     drawOutlet(svg, x, y, label) {
-      const group = this.createSVGElement('g', {});
+      const group = this.createSVGElement('g', { transform: `translate(${x},${y})` });
+
+      // Cercle principal
       group.appendChild(this.createSVGElement('circle', {
-        cx: x, cy: y, r: 20,
-        fill: 'none', stroke: 'black', 'stroke-width': 2
+        cx: 0,
+        cy: 0,
+        r: 15,
+        fill: 'none',
+        stroke: 'black',
+        'stroke-width': '1.5'
       }));
-      group.appendChild(this.createSVGElement('line', {
-        x1: x, y1: y + 5, x2: x, y2: y + 15,
-        stroke: 'black', 'stroke-width': 2
+
+      // Points intérieurs
+      group.appendChild(this.createSVGElement('circle', {
+        cx: -5,
+        cy: 0,
+        r: 2,
+        fill: 'black'
       }));
+
+      group.appendChild(this.createSVGElement('circle', {
+        cx: 5,
+        cy: 0,
+        r: 2,
+        fill: 'black'
+      }));
+
+      // Texte du label
       const text = this.createSVGElement('text', {
-        x: x, y: y + 30, 'text-anchor': 'middle',
-        'font-size': '8'
+        x: 0,
+        y: 25,
+        'text-anchor': 'middle',
+        'font-size': '8',
+        fill: 'black'
       });
       text.textContent = label;
       group.appendChild(text);
+
       svg.appendChild(group);
     },
 
-    drawGenericComponent(svg, x, y, label) {
-      const rect = this.createSVGElement('rect', {
-        x: x - 25, y: y - 20, width: 50, height: 40,
-        fill: 'red', stroke: 'black', 'stroke-width': '1'
-      });
+    drawSwitch(svg, x, y, label) {
+      const group = this.createSVGElement('g', { transform: `translate(${x},${y})` });
+
+      // Ligne de base
+      group.appendChild(this.createSVGElement('line', {
+        x1: -15,
+        y1: 0,
+        x2: 15,
+        y2: 0,
+        stroke: 'black',
+        'stroke-width': '1.5'
+      }));
+
+      // Ligne de l'interrupteur
+      group.appendChild(this.createSVGElement('line', {
+        x1: -15,
+        y1: 0,
+        x2: 10,
+        y2: -15,
+        stroke: 'black',
+        'stroke-width': '1.5'
+      }));
+
+      // Texte du label
       const text = this.createSVGElement('text', {
-        x: x, y: y + 5, 'text-anchor': 'middle',
-        'font-size': '10', fill: 'white'
+        x: 0,
+        y: 25,
+        'text-anchor': 'middle',
+        'font-size': '8',
+        fill: 'black'
       });
       text.textContent = label;
-      svg.appendChild(rect);
-      svg.appendChild(text);
+      group.appendChild(text);
+
+      svg.appendChild(group);
     },
 
-    drawLink(svg, fromX, fromY, toX, toY) {
-      svg.appendChild(this.createSVGElement('line', {
-        x1: fromX, y1: fromY, x2: toX, y2: toY,
-        stroke: 'black', 'stroke-width': 1
+    drawLamp(svg, x, y, label) {
+      const group = this.createSVGElement('g', { transform: `translate(${x},${y})` });
+
+      // Cercle principal
+      group.appendChild(this.createSVGElement('circle', {
+        cx: 0,
+        cy: 0,
+        r: 15,
+        fill: 'none',
+        stroke: 'black',
+        'stroke-width': '1.5'
       }));
-    },
 
-    drawComponentHierarchy(svg, component, x, y) {
-      const cellWidth = 70; // Largeur de la cellule
-      const cellHeight = 60; // Hauteur de la cellule
+      // Croix intérieure
+      group.appendChild(this.createSVGElement('line', {
+        x1: -10,
+        y1: -10,
+        x2: 10,
+        y2: 10,
+        stroke: 'black',
+        'stroke-width': '1'
+      }));
 
-      // Calculer les coordonnées de centre de la cellule
-      const cellCenterX = x * cellWidth + cellWidth / 2;
-      const cellCenterY = y * cellHeight + cellHeight / 2;
+      group.appendChild(this.createSVGElement('line', {
+        x1: -10,
+        y1: 10,
+        x2: 10,
+        y2: -10,
+        stroke: 'black',
+        'stroke-width': '1'
+      }));
 
-      if (component.type === 'disjoncteur') {
-        this.drawCircuitBreaker(svg, cellCenterX, cellCenterY, component.characteristics);
-      } else if (component.type === 'prise') {
-        this.drawOutlet(svg, cellCenterX, cellCenterY, component.characteristics);
-      } else {
-        this.drawGenericComponent(svg, cellCenterX, cellCenterY, component.characteristics);
-      }
+      // Texte du label
+      const text = this.createSVGElement('text', {
+        x: 0,
+        y: 25,
+        'text-anchor': 'middle',
+        'font-size': '8',
+        fill: 'black'
+      });
+      text.textContent = label;
+      group.appendChild(text);
 
-      if (component.children && component.children.length > 0) {
-        const childrenY = y + 1; // Décaler les enfants d'une cellule vers le bas
-        const childrenWidth = component.children.length * cellWidth;
-        const childrenStartX = x - (childrenWidth / 2) + 0.5;
-
-        component.children.forEach((child, index) => {
-          const childX = childrenStartX + (index * cellWidth);
-          this.drawLink(svg, cellCenterX, cellCenterY, childX, childrenY + cellHeight / 2);
-          this.drawComponentHierarchy(svg, child, childX, childrenY);
-        });
-      }
+      svg.appendChild(group);
     },
 
     async handleSubmit() {
       if (!this.isFormValid) return;
 
       const svg = this.$refs.svg;
-
-      // Clear existing SVG content
+      // Nettoyer le SVG existant
       while (svg.firstChild) {
         svg.removeChild(svg.firstChild);
       }
 
-      // Draw the grid
-      this.drawGrid(svg);
+      // Définir les dimensions de base
+      const GRID_START_X = 10;
+      const GRID_START_Y = 40;
+      const CELL_WIDTH = 78;
+      const CELL_HEIGHT = 80;
 
-      // Draw components
-      this.selectedComponents.forEach(comp => {
-        this.drawComponent(svg, comp);
-      });
-
-      // Draw the cartouche information
+      // Dessiner d'abord le cadre et la grille
       this.drawFrame(svg);
+
+      // Dessiner tous les composants
+      this.selectedComponents.forEach(component => {
+        const x = GRID_START_X + (component.column - 1) * CELL_WIDTH + CELL_WIDTH / 2;
+        const y = GRID_START_Y + (component.row - 1) * CELL_HEIGHT + CELL_HEIGHT / 2;
+
+        switch (component.type) {
+          case 'disjoncteur':
+            this.drawCircuitBreaker(svg, x, y, component.characteristics);
+            break;
+          case 'prise':
+            this.drawOutlet(svg, x, y, component.characteristics);
+            break;
+          case 'interrupteur':
+            this.drawSwitch(svg, x, y, component.characteristics);
+            break;
+          case 'lampe':
+            this.drawLamp(svg, x, y, component.characteristics);
+            break;
+        }
+      });
 
       try {
         await fetch('/api/components', {
@@ -465,72 +591,6 @@ export default {
       } catch (err) {
         console.error('Erreur lors de l\'envoi des composants', err);
       }
-    },
-
-    drawGrid(svg) {
-      const cellWidth = 80;
-      const cellHeight = 80;
-      const gridWidth = 10 * cellWidth;
-      const gridHeight = 5 * cellHeight;
-
-      // Draw horizontal lines
-      for (let i = 0; i <= 5; i++) {
-        const y = i * cellHeight;
-        svg.appendChild(this.createSVGElement('line', {
-          x1: 0, y1: y, x2: gridWidth, y2: y,
-          stroke: 'black', 'stroke-width': 1
-        }));
-      }
-
-      // Draw vertical lines
-      for (let i = 0; i <= 10; i++) {
-        const x = i * cellWidth;
-        svg.appendChild(this.createSVGElement('line', {
-          x1: x, y1: 0, x2: x, y2: gridHeight,
-          stroke: 'black', 'stroke-width': 1
-        }));
-      }
-    },
-
-    drawComponent(svg, component) {
-      const cellWidth = 80;
-      const cellHeight = 80;
-      const x = (component.column - 1) * cellWidth + cellWidth / 2;
-      const y = (component.row - 1) * cellHeight + cellHeight / 2;
-
-      let svgElement;
-      switch (component.type) {
-        case 'disjoncteur':
-          svgElement = this.createSVGElement('rect', {
-            x: x - 20, y: y - 20, width: 40, height: 40,
-            fill: 'none', stroke: 'black', 'stroke-width': 2
-          });
-          break;
-        case 'prise':
-          svgElement = this.createSVGElement('circle', {
-            cx: x, cy: y, r: 20,
-            fill: 'none', stroke: 'black', 'stroke-width': 2
-          });
-          break;
-        case 'interrupteur':
-          svgElement = this.createSVGElement('path', {
-            d: `M${x-20},${y} L${x+20},${y-20}`,
-            fill: 'none', stroke: 'black', 'stroke-width': 2
-          });
-          break;
-        case 'lampe':
-          svgElement = this.createSVGElement('circle', {
-            cx: x, cy: y, r: 20,
-            fill: 'yellow', stroke: 'black', 'stroke-width': 2
-          });
-          break;
-        default:
-          svgElement = this.createSVGElement('text', {
-            x: x, y: y, 'text-anchor': 'middle', 'alignment-baseline': 'middle'
-          });
-          svgElement.textContent = component.name;
-      }
-      svg.appendChild(svgElement);
     },
 
     downloadPDF() {
@@ -551,6 +611,29 @@ export default {
         pdf.save(`${this.cartouche.projectName}.pdf`);
       };
       img.src = 'data:image/svg+xml,' + encodeURIComponent(new XMLSerializer().serializeToString(svg));
+    },
+
+    saveSchema() {
+      const schemaData = {
+        cartouche: this.cartouche,
+        selectedComponents: this.selectedComponents,
+        grid: this.grid
+      };
+      localStorage.setItem('schema', JSON.stringify(schemaData));
+      console.log('Schéma sauvegardé');
+    },
+
+    loadSchema() {
+      const schemaData = JSON.parse(localStorage.getItem('schema'));
+      if (schemaData) {
+        this.cartouche = schemaData.cartouche;
+        this.selectedComponents = schemaData.selectedComponents;
+        this.grid = schemaData.grid;
+        this.validateForm(); // Valider après chargement du schéma
+        console.log('Schéma chargé');
+      } else {
+        console.log('Aucun schéma trouvé');
+      }
     },
 
     validateForm() {
@@ -574,9 +657,13 @@ export default {
   border: 1px solid #ccc;
   cursor: move;
 }
+.grid-container {
+  overflow: auto;
+  max-height: 400px;
+}
 .grid {
   display: table;
-  border-collapse: collapse;
+  borderCollapse: collapse;
 }
 .grid-row {
   display: table-row;
