@@ -120,7 +120,7 @@
     </form>
 
     <div :style="styles.svgContainer">
-      <svg ref="svg" width="800" height="600"></svg>
+      <svg ref="svg" width="800" height="700"></svg>
     </div>
   </div>
 </template>
@@ -153,7 +153,7 @@ export default {
         { name: 'Interrupteur', type: 'interrupteur', characteristics: '1P 10A' },
         { name: 'Lampe', type: 'lampe', characteristics: 'Lampe' }
       ],
-      grid: Array.from({ length: 6 }, () => Array(10).fill(null)),
+      grid: Array.from({ length: 5 }, () => Array(10).fill(null)),
       draggedComponent: null,
       styles: {
         container: {
@@ -194,7 +194,6 @@ export default {
         },
         gridContainer: {
           overflow: 'auto',
-          maxHeight: '450px',
         },
         grid: {
           display: 'table',
@@ -594,24 +593,89 @@ export default {
     },
 
     downloadPDF() {
-      const svg = this.$refs.svg;
-
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      canvas.width = svg.width.baseVal.value;
-      canvas.height = svg.height.baseVal.value;
-
-      const img = new Image();
-      img.onload = () => {
-        ctx.drawImage(img, 0, 0);
-
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('l', 'pt', 'a4');
-        pdf.addImage(imgData, 'PNG', 0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight());
-        pdf.save(`${this.cartouche.projectName}.pdf`);
-      };
-      img.src = 'data:image/svg+xml,' + encodeURIComponent(new XMLSerializer().serializeToString(svg));
-    },
+  const svg = this.$refs.svg;
+  
+  // Définir une échelle plus grande pour une meilleure qualité
+  const scale = 4;
+  
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  
+  // Augmenter la taille du canvas pour une meilleure résolution
+  canvas.width = svg.width.baseVal.value * scale;
+  canvas.height = svg.height.baseVal.value * scale;
+  
+  // Configurer le contexte pour un meilleur rendu
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  
+  const img = new Image();
+  const svgData = new XMLSerializer().serializeToString(svg);
+  const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+  const url = URL.createObjectURL(svgBlob);
+  
+  img.onload = () => {
+    // Effacer le canvas avec un fond blanc
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Dessiner l'image mise à l'échelle
+    ctx.scale(scale, scale);
+    ctx.drawImage(img, 0, 0);
+    
+    // Créer le PDF avec une meilleure qualité
+    const pdf = new jsPDF({
+      orientation: 'l',
+      unit: 'px',
+      format: 'a4',
+      compress: true
+    });
+    
+    const imgData = canvas.toDataURL('image/jpeg', 1.0);
+    
+    // Calculer les dimensions pour ajuster au format A4
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    const aspectRatio = canvas.width / canvas.height;
+    
+    let imgWidth = pdfWidth;
+    let imgHeight = pdfWidth / aspectRatio;
+    
+    // Ajuster si l'image est trop haute
+    if (imgHeight > pdfHeight) {
+      imgHeight = pdfHeight;
+      imgWidth = pdfHeight * aspectRatio;
+    }
+    
+    // Centrer l'image dans la page
+    const x = (pdfWidth - imgWidth) / 2;
+    const y = (pdfHeight - imgHeight) / 2;
+    
+    // Définir un fond blanc pour la page
+    pdf.setFillColor(255, 255, 255);
+    pdf.rect(0, 0, pdfWidth, pdfHeight, 'F');
+    
+    // Ajouter l'image au PDF avec la meilleure qualité
+    pdf.addImage(imgData, 'JPEG', x, y, imgWidth, imgHeight, undefined, 'FAST');
+    
+    // Ajouter des métadonnées
+    pdf.setProperties({
+      title: this.cartouche.projectName,
+      subject: 'Schéma électrique',
+      author: 'SUDELEC',
+      keywords: 'schéma, électrique, ' + this.cartouche.projectName,
+      creator: 'SUDELEC Schema Generator'
+    });
+    
+    // Sauvegarder le PDF
+    pdf.save(`${this.cartouche.projectName}.pdf`);
+    
+    // Nettoyer
+    URL.revokeObjectURL(url);
+  };
+  
+  img.src = url;
+},
 
     saveSchema() {
       const schemaData = {
@@ -663,7 +727,6 @@ export default {
 }
 .grid {
   display: table;
-  borderCollapse: collapse;
 }
 .grid-row {
   display: table-row;
