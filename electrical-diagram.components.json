@@ -1,6 +1,6 @@
 [{
   "_id": {
-    "$oid": "66f99c8bbef71600ad73e81c"
+    "$oid": "6704d4951218a2948348bfeb"
   },
   "name": "Disjoncteur 4P 25A 300mA",
   "type": "disjoncteur",
@@ -11,7 +11,7 @@
 },
 {
   "_id": {
-    "$oid": "66f99c8bbef71600ad73e81d"
+    "$oid": "6704d4951218a2948348bfec"
   },
   "name": "Disjoncteur 4P 63A 30mA",
   "type": "disjoncteur",
@@ -22,7 +22,7 @@
 },
 {
   "_id": {
-    "$oid": "66f99c8bbef71600ad73e81e"
+    "$oid": "6704d4951218a2948348bfed"
   },
   "name": "Prise 1P+N 10A",
   "type": "prise",
@@ -33,7 +33,7 @@
 },
 {
   "_id": {
-    "$oid": "66f99c8bbef71600ad73e81f"
+    "$oid": "6704d4951218a2948348bfee"
   },
   "name": "Prise 1P+N 16A",
   "type": "prise",
@@ -41,95 +41,4 @@
   "column": 2,
   "row": 2,
   "children": []
-},
-{
-  "_id": {
-    "$oid": "66fbc5ea7821533f4cd6209d"
-  },
-  "children": [],
-  "__v": 0
-},
-{
-  "_id": {
-    "$oid": "66fbdf797821533f4cd620a1"
-  },
-  "children": [],
-  "__v": 0
-},
-{
-  "_id": {
-    "$oid": "66fbdf807821533f4cd620a3"
-  },
-  "children": [],
-  "__v": 0
-},
-{
-  "_id": {
-    "$oid": "66fc08dc7821533f4cd620a5"
-  },
-  "children": [],
-  "__v": 0
-},
-{
-  "_id": {
-    "$oid": "66fc08e17821533f4cd620a7"
-  },
-  "children": [],
-  "__v": 0
-},
-{
-  "_id": {
-    "$oid": "66fc0a1a7821533f4cd620a9"
-  },
-  "children": [],
-  "__v": 0
-},
-{
-  "_id": {
-    "$oid": "66fc0b467821533f4cd620ab"
-  },
-  "children": [],
-  "__v": 0
-},
-{
-  "_id": {
-    "$oid": "66fc0c317821533f4cd620ad"
-  },
-  "children": [],
-  "__v": 0
-},
-{
-  "_id": {
-    "$oid": "66fc10207821533f4cd620af"
-  },
-  "children": [],
-  "__v": 0
-},
-{
-  "_id": {
-    "$oid": "66fc14487821533f4cd620b1"
-  },
-  "children": [],
-  "__v": 0
-},
-{
-  "_id": {
-    "$oid": "66fc16117821533f4cd620b3"
-  },
-  "children": [],
-  "__v": 0
-},
-{
-  "_id": {
-    "$oid": "66fc174e7821533f4cd620b5"
-  },
-  "children": [],
-  "__v": 0
-},
-{
-  "_id": {
-    "$oid": "66fc24b67821533f4cd620b7"
-  },
-  "children": [],
-  "__v": 0
 }]

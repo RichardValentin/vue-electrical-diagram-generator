@@ -20,47 +20,42 @@ app.get('/', (req, res) => {
   res.json({ message: "Welcome to the Electrical Diagram Generator API" });
 });
 
-// Définir un schéma pour les composants
-const componentSchema = new mongoose.Schema({
-  name: String,
-  type: String,
-  characteristics: String,
-  column: Number,
-  row: Number,
-  children: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Component' }]
-});
-
-// Définir un modèle pour les composants
-const Component = mongoose.model('Component', componentSchema);
-
-// Connexion à MongoDB
-mongoose.connect('mongodb://localhost:27017/electrical-diagram')
-  .then(() => {
-    console.log('Connexion à MongoDB réussie');
-  })
-  .catch(err => {
-    console.error('Erreur de connexion à MongoDB', err);
-  });
+// Import the Composant model
+const Composant = require('./models/Composant');
 
 // Route pour obtenir tous les composants
 app.get('/api/components', async (req, res) => {
   try {
-    const components = await Component.find().populate('children');
+    console.log('Fetching components from MongoDB');
+    const components = await Composant.find();
+    console.log('Components fetched successfully');
     res.json(components);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Error fetching components', err);
+    res.status(500).json({ message: 'Error fetching components' });
   }
 });
 
 // Route pour créer un nouveau composant
 app.post('/api/components', async (req, res) => {
-  const component = new Component(req.body);
+  const composant = new Composant(req.body);
   try {
-    await component.save();
-    res.status(201).json(component);
+    await composant.save();
+    res.status(201).json(composant);
   } catch (err) {
+    console.error('Error saving composant', err);
     res.status(400).json({ message: err.message });
   }
+});
+
+// Connect to MongoDB
+mongoose.connect('mongodb://localhost:27017/electrical-diagram', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(() => {
+  console.log('Connected to MongoDB');
+}).catch((err) => {
+  console.error('Error connecting to MongoDB', err);
 });
 
 // Add this catch-all route at the end
@@ -70,5 +65,5 @@ app.use((req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Serveur démarré sur le port ${port}`);
+  console.log(`Server started on port ${port}`);
 });
