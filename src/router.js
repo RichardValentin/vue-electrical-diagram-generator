@@ -1,25 +1,18 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import ElectricalDiagram from './components/ElectricalDiagram.vue';
-import FormulaComponent from './components/FormulaComponent.vue';
-import FormulaCartouche from './components/FormulaCartouche.vue';
+import LoginPage from './components/LoginPage.vue';
+import MainPage from './components/MainPage.vue';
+import SchemaPage from './components/SchemaPage.vue';
+import VisualizationPage from './components/VisualizationPage.vue';
+import DownloadPDF from './components/DownloadPDF.vue';
 
-const routes = [
-  {
-    path: '/',
-    name: 'ElectricalDiagram',
-    component: ElectricalDiagram
-  },
-  {
-    path: '/formula',
-    name: 'FormulaComponent',
-    component: FormulaComponent
-  },
-  {
-    path: '/cartouche',
-    name: 'FormulaCartouche',
-    component: FormulaCartouche
-  }
-];
+const routes= [
+  { path: '/', component: LoginPage },
+  { path: '/login', component: LoginPage },
+  { path: '/main', component: MainPage },
+  { path: '/schema', component: SchemaPage },
+  { path: '/visualization', component: VisualizationPage },
+  { path: '/downloadPDF', component: DownloadPDF }
+]
 
 const router = createRouter({
   history: createWebHistory(),
@@ -27,3 +20,4 @@ const router = createRouter({
 });
 
 export default router;
+
