@@ -20,8 +20,9 @@ app.get('/', (req, res) => {
   res.json({ message: "Welcome to the Electrical Diagram Generator API" });
 });
 
-// Import the Composant model
+// Import the models
 const Composant = require('./models/Composant');
+const Arrival = require('./models/Arrival');
 
 // Route pour obtenir tous les composants
 app.get('/api/components', async (req, res) => {
@@ -44,6 +45,32 @@ app.post('/api/components', async (req, res) => {
     res.status(201).json(composant);
   } catch (err) {
     console.error('Error saving composant', err);
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// Route pour obtenir toutes les arrivées
+app.get('/api/arrivals', async (req, res) => {
+  console.log('Received request for /api/arrivals');
+  try {
+    console.log('Fetching arrival components from MongoDB');
+    const arrivals = await Arrival.find();
+    console.log('Arrival components fetched successfully');
+    res.json(arrivals);
+  } catch (err) {
+    console.error('Error fetching arrival components', err);
+    res.status(500).json({ message: 'Error fetching arrival components' });
+  }
+});
+
+// Route pour créer une nouvelle arrivée
+app.post('/api/arrivals', async (req, res) => {
+  const arrival = new Arrival(req.body);
+  try {
+    await arrival.save();
+    res.status(201).json(arrival);
+  } catch (err) {
+    console.error('Error saving arrival', err);
     res.status(400).json({ message: err.message });
   }
 });
